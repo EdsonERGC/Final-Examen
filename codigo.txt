@@ -1,0 +1,73 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class DatabaseCRUD {
+    private static final String URL = "jdbc:mariadb://localhost:3306/nombre_de_tu_base_de_datos";
+    private static final String USER = "root";
+    private static final String PASSWORD = "123";
+
+    public static void main(String[] args) {
+        crearRegistro("Nuevo Nombre", 25);
+        leerRegistros();
+        actualizarRegistro(1, "Nombre Actualizado", 30);
+        borrarRegistro(2);
+    }
+
+    public static void crearRegistro(String nombre, int edad) {
+        String sql = "INSERT INTO tu_tabla (nombre, edad) VALUES (?, ?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, nombre);
+            statement.setInt(2, edad);
+            int filasAfectadas = statement.executeUpdate();
+            System.out.println("Registro creado, filas afectadas: " + filasAfectadas);
+        } catch (SQLException e) {
+            System.out.println("Error al crear el registro: " + e.getMessage());
+        }
+    }
+
+    public static void leerRegistros() {
+        String sql = "SELECT * FROM tu_tabla";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                System.out.println("ID: " + resultSet.getInt("id"));
+                System.out.println("Nombre: " + resultSet.getString("nombre"));
+                System.out.println("Edad: " + resultSet.getInt("edad"));
+                System.out.println("---------------");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al leer registros: " + e.getMessage());
+        }
+    }
+
+    public static void actualizarRegistro(int id, String nuevoNombre, int nuevaEdad) {
+        String sql = "UPDATE tu_tabla SET nombre = ?, edad = ? WHERE id = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, nuevoNombre);
+            statement.setInt(2, nuevaEdad);
+            statement.setInt(3, id);
+            int filasAfectadas = statement.executeUpdate();
+            System.out.println("Registro actualizado, filas afectadas: " + filasAfectadas);
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar el registro: " + e.getMessage());
+        }
+    }
+
+    public static void borrarRegistro(int id) {
+        String sql = "DELETE FROM tu_tabla WHERE id = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, id);
+            int filasAfectadas = statement.executeUpdate();
+            System.out.println("Registro borrado, filas afectadas: " + filasAfectadas);
+        } catch (SQLException e) {
+            System.out.println("Error al borrar el registro: " + e.getMessage());
+        }
+    }
+}
